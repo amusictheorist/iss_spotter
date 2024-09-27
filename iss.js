@@ -1,3 +1,5 @@
+const needle = require("needle");
+
 /**
  * Makes a single API request to retrieve the user's IP address.
  * Input:
@@ -6,17 +8,22 @@
  *   - An error, if any (nullable)
  *   - The IP address as a string (null if error). Example: "162.245.144.188"
  */
-const needle = require("needle");
 
 const fetchMyIP = function (callback) {
   needle.get("https://api.ipify.org?format=json", (error, response, body) => {
     if (error) {
       callback(error, null);
     }
-    if (response) {
-      console.log("IP received: ", body.ip);
+
+    if (response.statusCode !== 200) {
+      const msg = `Satus Code ${response.statusCode} when fetching IP. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
     }
-  })
+
+    const ip = body.ip;
+    callback(null, ip);
+  });
 };
 
 module.exports = { fetchMyIP };
